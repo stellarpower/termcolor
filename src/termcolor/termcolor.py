@@ -86,8 +86,10 @@ COLORS: dict[str, int] = {
 }
 
 
-RESET = "\033[0m"
-
+RESET                     = "\033[0m"
+ANSIStartFormatString     = "\033[%dm%s"
+RGBForegroundFormatString = "\033[38;2;%d;%d;%dm%s"
+RGBBackgroundFormatString = "\033[48;2;%d;%d;%dm%s"
 
 @cache
 def can_colorize(
@@ -167,26 +169,24 @@ def colored(
     if not can_colorize(no_color=no_color, force_color=force_color):
         return result
 
-    fmt_str = "\033[%dm%s"
-    rgb_fore_fmt_str = "\033[38;2;%d;%d;%dm%s"
-    rgb_back_fmt_str = "\033[48;2;%d;%d;%dm%s"
+    
     if color is not None:
         if isinstance(color, str):
-            result = fmt_str % (COLORS[color], result)
+            result = ANSIStartFormatString % (COLORS[color], result)
         elif isinstance(color, tuple):
             _check_rgb(color)
-            result = rgb_fore_fmt_str % (color[0], color[1], color[2], result)
+            result = RGBForegroundFormatString % (color[0], color[1], color[2], result)
 
     if on_color is not None:
         if isinstance(on_color, str):
-            result = fmt_str % (HIGHLIGHTS[on_color], result)
+            result = ANSIStartFormatString % (HIGHLIGHTS[on_color], result)
         elif isinstance(on_color, tuple):
             _check_rgb(on_color)
-            result = rgb_back_fmt_str % (on_color[0], on_color[1], on_color[2], result)
+            result = RGBBackgroundFormatString % (on_color[0], on_color[1], on_color[2], result)
 
     if attrs is not None:
         for attr in attrs:
-            result = fmt_str % (ATTRIBUTES[attr], result)
+            result = ANSIStartFormatString % (ATTRIBUTES[attr], result)
 
     result += RESET
 
